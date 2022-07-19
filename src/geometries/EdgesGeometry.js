@@ -14,7 +14,6 @@ class EdgesGeometry extends BufferGeometry {
 	constructor( geometry = null, thresholdAngle = 1 ) {
 
 		super();
-
 		this.type = 'EdgesGeometry';
 
 		this.parameters = {

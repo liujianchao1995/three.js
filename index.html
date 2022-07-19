@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="utf-8">
+	<title>Three.js – JavaScript 3D 库</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:site" content="@threejs">
+	<meta name="twitter:title" content="Three.js – JavaScript 3D library">
+	<meta property="og:image" content="files/share.png">
+	<link rel="shortcut icon" href="files/favicon_white.ico" media="(prefers-color-scheme: dark)" />
+	<link rel="shortcut icon" href="files/favicon.ico" media="(prefers-color-scheme: light)" />
+	<link rel="stylesheet" type="text/css" href="files/main.css">
+</head>
+
+<body class="home">
+	<div id="panel">
+		<div id="header">
+			<h1>
+				<div>three.js 中文网</div><a id="version" href="http://github.com/mrdoob/three.js/releases">r142</a>
+			</h1>
+			<div id="sections">
+				<a href="docs/index.html#manual/introduction/Creating-a-scene">docs</a>
+				<a href="examples/#webgl_animation_keyframes">examples</a>
+			</div>
+			<div id="expandButton"></div>
+		</div>
+		<div id="panelScrim"></div>
+		<div id="contentWrapper">
+			<div id="content">
+				<h2>学习</h2>
+				<ul>
+					<li><a href="docs/index.html#manual/introduction/Creating-a-scene">文档</a></li>
+					<li><a href="examples/#webgl_animation_keyframes">示例</a></li>
+					<li><a href="editor/">绘制</a></li>
+				</ul>
+				<h2>社区</h2>
+				<ul>
+					<li><a href="https://stackoverflow.com/questions/tagged/three.js">问答</a></li>
+					<li><a href="https://discord.gg/56GBJwAnUS">组织</a></li>
+					<li><a href="https://discourse.threejs.org/">论坛</a></li>
+					<li><a href="https://join.slack.com/t/threejs/shared_invite/zt-rnuegz5e-FQpc6YboDVW~5idlp7GfDw">协作</a></li>
+					<li><a href="https://twitter.com/threejs">推特</a></li>
+				</ul>
+				<h2>开发</h2>
+				<ul>
+					<li><a href="https://github.com/mrdoob/three.js/">源码</a></li>
+					<li><a href="https://github.com/mrdoob/three.js/archive/master.zip">下载</a></li>
+					<li><a href="https://chrome.google.com/webstore/detail/threejs-developer-tools/ebpnegggocnnhleeicgljbedjkganaek">浏览器插件</a></li>
+				</ul>
+				<h2>学习资源</h2>
+				<ul>
+					<li><a href="manual/#zh/fundamentals" target="_blank" rel="noopener">《Three.js基础》</a></li>
+					<li><a href="https://threejs-journey.xyz/" target="_blank" rel="noopener">《Three.js之旅》</a></li>
+					<li><a href="https://www.packtpub.com/web-development/learn-threejs-third-edition" target="_blank" rel="noopener">《学习Three.js》</a></li>
+					<li><a href="https://www.amazon.co.jp/初めてのThree-js-第2版-_WebGLのためのJavaScript-3Dライブラリ-Dirksen/dp/4873117704/" target="_blank" rel="noopener">《初见Three.js》</a></li>
+				</ul>
+				<h2>商品</h2>
+				<ul>
+					<li><a href="https://teespring.com/stores/threejs-store" target="_blank" rel="noopener">T恤</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<script>
+		var panel = document.getElementById('panel');
+		var expandButton = document.getElementById('expandButton');
+		var panelScrim = document.getElementById('panelScrim');
+		expandButton.addEventListener('click', function (event) {
+			panel.classList.toggle('open');
+			event.preventDefault();
+		});
+		panelScrim.onclick = function (event) {
+			event.preventDefault();
+			panel.classList.toggle('open');
+		};
+	</script>
+	<div id="viewer">
+		<a id="button" class="text" href="https://discourse.threejs.org/c/showcase">submit project</a>
+		<img src="files/share.png" width="100%">
+	</div>
+</body>
+
+</html>
