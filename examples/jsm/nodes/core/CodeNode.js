@@ -1,16 +1,17 @@
-import Node from './Node.js';
+import Node, { addNodeClass } from './Node.js';
+import { nodeProxy } from '../shadernode/ShaderNode.js';
 
 class CodeNode extends Node {
 
-	constructor( code = '', nodeType = 'code' ) {
+	constructor( code = '', includes = [] ) {
 
-		super( nodeType );
+		super( 'code' );
 
 		this.isCodeNode = true;
 
 		this.code = code;
 
-		this._includes = [];
+		this._includes = includes;
 
 	}
 
@@ -48,3 +49,7 @@ class CodeNode extends Node {
 }
 
 export default CodeNode;
+
+export const code = nodeProxy( CodeNode );
+
+addNodeClass( CodeNode );

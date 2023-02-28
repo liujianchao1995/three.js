@@ -25,9 +25,6 @@ class OrbitControls extends EventDispatcher {
 
 		super();
 
-		if ( domElement === undefined ) console.warn( 'THREE.OrbitControls: The second parameter "domElement" is now mandatory.' );
-		if ( domElement === document ) console.error( 'THREE.OrbitControls: "document" should not be used as the target "domElement". Please use "renderer.domElement" instead.' );
-
 		this.object = object;
 		this.domElement = domElement;
 		this.domElement.style.touchAction = 'none'; // disable touch scroll
@@ -124,6 +121,13 @@ class OrbitControls extends EventDispatcher {
 
 			domElement.addEventListener( 'keydown', onKeyDown );
 			this._domElementKeyEvents = domElement;
+
+		};
+
+		this.stopListenToKeyEvents = function () {
+
+			this._domElementKeyEvents.removeEventListener( 'keydown', onKeyDown );
+			this._domElementKeyEvents = null;
 
 		};
 
@@ -297,7 +301,7 @@ class OrbitControls extends EventDispatcher {
 			scope.domElement.removeEventListener( 'contextmenu', onContextMenu );
 
 			scope.domElement.removeEventListener( 'pointerdown', onPointerDown );
-			scope.domElement.removeEventListener( 'pointercancel', onPointerCancel );
+			scope.domElement.removeEventListener( 'pointercancel', onPointerUp );
 			scope.domElement.removeEventListener( 'wheel', onMouseWheel );
 
 			scope.domElement.removeEventListener( 'pointermove', onPointerMove );
@@ -307,6 +311,7 @@ class OrbitControls extends EventDispatcher {
 			if ( scope._domElementKeyEvents !== null ) {
 
 				scope._domElementKeyEvents.removeEventListener( 'keydown', onKeyDown );
+				scope._domElementKeyEvents = null;
 
 			}
 
@@ -604,22 +609,62 @@ class OrbitControls extends EventDispatcher {
 			switch ( event.code ) {
 
 				case scope.keys.UP:
-					pan( 0, scope.keyPanSpeed );
+
+					if ( event.ctrlKey || event.metaKey || event.shiftKey ) {
+
+						rotateUp( 2 * Math.PI * scope.rotateSpeed / scope.domElement.clientHeight );
+
+					} else {
+
+						pan( 0, scope.keyPanSpeed );
+
+					}
+
 					needsUpdate = true;
 					break;
 
 				case scope.keys.BOTTOM:
-					pan( 0, - scope.keyPanSpeed );
+
+					if ( event.ctrlKey || event.metaKey || event.shiftKey ) {
+
+						rotateUp( - 2 * Math.PI * scope.rotateSpeed / scope.domElement.clientHeight );
+
+					} else {
+
+						pan( 0, - scope.keyPanSpeed );
+
+					}
+
 					needsUpdate = true;
 					break;
 
 				case scope.keys.LEFT:
-					pan( scope.keyPanSpeed, 0 );
+
+					if ( event.ctrlKey || event.metaKey || event.shiftKey ) {
+
+						rotateLeft( 2 * Math.PI * scope.rotateSpeed / scope.domElement.clientHeight );
+
+					} else {
+
+						pan( scope.keyPanSpeed, 0 );
+
+					}
+
 					needsUpdate = true;
 					break;
 
 				case scope.keys.RIGHT:
-					pan( - scope.keyPanSpeed, 0 );
+
+					if ( event.ctrlKey || event.metaKey || event.shiftKey ) {
+
+						rotateLeft( - 2 * Math.PI * scope.rotateSpeed / scope.domElement.clientHeight );
+
+					} else {
+
+						pan( - scope.keyPanSpeed, 0 );
+
+					}
+
 					needsUpdate = true;
 					break;
 
@@ -838,26 +883,20 @@ class OrbitControls extends EventDispatcher {
 
 		function onPointerUp( event ) {
 
-		    removePointer( event );
-
-		    if ( pointers.length === 0 ) {
-
-		        scope.domElement.releasePointerCapture( event.pointerId );
-
-		        scope.domElement.removeEventListener( 'pointermove', onPointerMove );
-		        scope.domElement.removeEventListener( 'pointerup', onPointerUp );
-
-		    }
-
-		    scope.dispatchEvent( _endEvent );
-
-		    state = STATE.NONE;
-
-		}
-
-		function onPointerCancel( event ) {
-
 			removePointer( event );
+
+			if ( pointers.length === 0 ) {
+
+				scope.domElement.releasePointerCapture( event.pointerId );
+
+				scope.domElement.removeEventListener( 'pointermove', onPointerMove );
+				scope.domElement.removeEventListener( 'pointerup', onPointerUp );
+
+			}
+
+			scope.dispatchEvent( _endEvent );
+
+			state = STATE.NONE;
 
 		}
 
@@ -1209,7 +1248,7 @@ class OrbitControls extends EventDispatcher {
 		scope.domElement.addEventListener( 'contextmenu', onContextMenu );
 
 		scope.domElement.addEventListener( 'pointerdown', onPointerDown );
-		scope.domElement.addEventListener( 'pointercancel', onPointerCancel );
+		scope.domElement.addEventListener( 'pointercancel', onPointerUp );
 		scope.domElement.addEventListener( 'wheel', onMouseWheel, { passive: false } );
 
 		// force an update at start

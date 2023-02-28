@@ -29,6 +29,8 @@ class WebXRManager extends EventDispatcher {
 
 		let referenceSpace = null;
 		let referenceSpaceType = 'local-floor';
+		// Set default foveation to maximum.
+		let foveation = 1.0;
 		let customReferenceSpace = null;
 
 		let pose = null;
@@ -42,6 +44,9 @@ class WebXRManager extends EventDispatcher {
 
 		const controllers = [];
 		const controllerInputSources = [];
+
+		const planes = new Set();
+		const planesLastChangedTimes = new Map();
 
 		//
 
@@ -285,7 +290,8 @@ class WebXRManager extends EventDispatcher {
 						{
 							format: RGBAFormat,
 							type: UnsignedByteType,
-							encoding: renderer.outputEncoding
+							encoding: renderer.outputEncoding,
+							stencilBuffer: attributes.stencil
 						}
 					);
 
@@ -334,8 +340,7 @@ class WebXRManager extends EventDispatcher {
 
 				newRenderTarget.isXRRenderTarget = true; // TODO Remove this when possible, see #23278
 
-				// Set foveation to maximum.
-				this.setFoveation( 1.0 );
+				this.setFoveation( foveation );
 
 				customReferenceSpace = null;
 				referenceSpace = await session.requestReferenceSpace( referenceSpaceType );
@@ -363,7 +368,7 @@ class WebXRManager extends EventDispatcher {
 				if ( index >= 0 ) {
 
 					controllerInputSources[ index ] = null;
-					controllers[ index ].dispatchEvent( { type: 'disconnected', data: inputSource } );
+					controllers[ index ].disconnect( inputSource );
 
 				}
 
@@ -409,7 +414,7 @@ class WebXRManager extends EventDispatcher {
 
 				if ( controller ) {
 
-					controller.dispatchEvent( { type: 'connected', data: inputSource } );
+					controller.connect( inputSource );
 
 				}
 
@@ -529,11 +534,8 @@ class WebXRManager extends EventDispatcher {
 
 			// update user camera and its children
 
-			camera.position.copy( cameraVR.position );
-			camera.quaternion.copy( cameraVR.quaternion );
-			camera.scale.copy( cameraVR.scale );
 			camera.matrix.copy( cameraVR.matrix );
-			camera.matrixWorld.copy( cameraVR.matrixWorld );
+			camera.matrix.decompose( camera.position, camera.quaternion, camera.scale );
 
 			const children = camera.children;
 
@@ -567,38 +569,40 @@ class WebXRManager extends EventDispatcher {
 
 		this.getFoveation = function () {
 
-			if ( glProjLayer !== null ) {
+			if ( glProjLayer === null && glBaseLayer === null ) {
 
-				return glProjLayer.fixedFoveation;
-
-			}
-
-			if ( glBaseLayer !== null ) {
-
-				return glBaseLayer.fixedFoveation;
+				return undefined;
 
 			}
 
-			return undefined;
+			return foveation;
 
 		};
 
-		this.setFoveation = function ( foveation ) {
+		this.setFoveation = function ( value ) {
 
 			// 0 = no foveation = full resolution
 			// 1 = maximum foveation = the edges render at lower resolution
 
+			foveation = value;
+
 			if ( glProjLayer !== null ) {
 
-				glProjLayer.fixedFoveation = foveation;
+				glProjLayer.fixedFoveation = value;
 
 			}
 
 			if ( glBaseLayer !== null && glBaseLayer.fixedFoveation !== undefined ) {
 
-				glBaseLayer.fixedFoveation = foveation;
+				glBaseLayer.fixedFoveation = value;
 
 			}
+
+		};
+
+		this.getPlanes = function () {
+
+			return planes;
 
 		};
 
@@ -709,6 +713,65 @@ class WebXRManager extends EventDispatcher {
 			}
 
 			if ( onAnimationFrameCallback ) onAnimationFrameCallback( time, frame );
+
+			if ( frame.detectedPlanes ) {
+
+				scope.dispatchEvent( { type: 'planesdetected', data: frame.detectedPlanes } );
+
+				let planesToRemove = null;
+
+				for ( const plane of planes ) {
+
+					if ( ! frame.detectedPlanes.has( plane ) ) {
+
+						if ( planesToRemove === null ) {
+
+							planesToRemove = [];
+
+						}
+
+						planesToRemove.push( plane );
+
+					}
+
+				}
+
+				if ( planesToRemove !== null ) {
+
+					for ( const plane of planesToRemove ) {
+
+						planes.delete( plane );
+						planesLastChangedTimes.delete( plane );
+						scope.dispatchEvent( { type: 'planeremoved', data: plane } );
+
+					}
+
+				}
+
+				for ( const plane of frame.detectedPlanes ) {
+
+					if ( ! planes.has( plane ) ) {
+
+						planes.add( plane );
+						planesLastChangedTimes.set( plane, frame.lastChangedTime );
+						scope.dispatchEvent( { type: 'planeadded', data: plane } );
+
+					} else {
+
+						const lastKnownTime = planesLastChangedTimes.get( plane );
+
+						if ( plane.lastChangedTime > lastKnownTime ) {
+
+							planesLastChangedTimes.set( plane, plane.lastChangedTime );
+							scope.dispatchEvent( { type: 'planechanged', data: plane } );
+
+						}
+
+					}
+
+				}
+
+			}
 
 			xrFrame = null;
 

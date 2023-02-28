@@ -76,6 +76,16 @@ class PlaneGeometry extends BufferGeometry {
 
 	}
 
+	copy( source ) {
+
+		super.copy( source );
+
+		this.parameters = Object.assign( {}, source.parameters );
+
+		return this;
+
+	}
+
 	static fromJSON( data ) {
 
 		return new PlaneGeometry( data.width, data.height, data.widthSegments, data.heightSegments );
@@ -84,4 +94,4 @@ class PlaneGeometry extends BufferGeometry {
 
 }
 
-export { PlaneGeometry, PlaneGeometry as PlaneBufferGeometry };
+export { PlaneGeometry };
